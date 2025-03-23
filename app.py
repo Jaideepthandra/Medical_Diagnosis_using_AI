@@ -1,7 +1,10 @@
 import streamlit as st
 import pickle
 from streamlit_option_menu import option_menu
+
 st.set_page_config(page_title="AI Medical Diagnosis", page_icon="⚕️")
+
+# Hide Streamlit styles
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -10,8 +13,10 @@ hide_st_style = """
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
-background_image_url = "https://img.freepik.com/free-vector/smart-healthcare-technology-template_53876-117499.jpg?t=st=1742115269~exp=1742118869~hmac=155bbd5291195ad8a5eaf4cc33bdb017c89a80107daafc7cfb9f8cf38606de7e&w=1380"  # Replace with your image URL
-page_bg_img = f"""
+
+# Background Image
+background_image_url = "https://img.freepik.com/free-vector/smart-healthcare-technology-template_53876-117499.jpg?t=st=1742115269~exp=1742118869~hmac=155bbd5291195ad8a5eaf4cc33bdb017c89a80107daafc7cfb9f8cf38606de7e&w=1380"
+st.markdown(f"""
 <style>
 [data-testid="stAppViewContainer"] {{
 background-image: url({background_image_url});
@@ -30,8 +35,9 @@ height: 100%;
 background-color: rgba(0, 0, 0, 0.7);
 }}
 </style>
-"""
-st.markdown(page_bg_img, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
+
+# Load models
 models = {
     'diabetes': pickle.load(open('diabetes_model.sav', 'rb')),
     'heart_disease': pickle.load(open('heart_disease_model.sav', 'rb')),
@@ -39,7 +45,9 @@ models = {
     'lung_cancer': pickle.load(open('lungs_disease_model.sav', 'rb')),
     'thyroid': pickle.load(open('Thyroid_model.sav', 'rb'))
 }
-selected = st.selectbox(
+
+# Sidebar for disease selection
+selected = st.sidebar.selectbox(
     'Select a Disease to Predict',
     ['Diabetes Prediction',
      'Heart Disease Prediction',
@@ -47,14 +55,16 @@ selected = st.selectbox(
      'Lung Cancer Prediction',
      'Hypo-Thyroid Prediction']
 )
+
 def display_input(label, tooltip, key, type="text"):
     if type == "text":
         return st.text_input(label, key=key, help=tooltip)
     elif type == "number":
         return st.number_input(label, key=key, help=tooltip, step=1)
-# Diabetes Prediction Page
+
+# Prediction Pages
 if selected == 'Diabetes Prediction':
-    st.title('Diabetes')
+    st.title('Diabetes Prediction')
     st.write("Enter the following details to predict diabetes:")
     Pregnancies = display_input('Number of Pregnancies', 'Enter number of times pregnant', 'Pregnancies', 'number')
     Glucose = display_input('Glucose Level', 'Enter glucose level', 'Glucose', 'number')
@@ -64,14 +74,12 @@ if selected == 'Diabetes Prediction':
     BMI = display_input('BMI value', 'Enter Body Mass Index value', 'BMI', 'number')
     DiabetesPedigreeFunction = display_input('Diabetes Pedigree Function value', 'Enter diabetes pedigree function value', 'DiabetesPedigreeFunction', 'number')
     Age = display_input('Age of the Person', 'Enter age of the person', 'Age', 'number')
-    diab_diagnosis = ''
     if st.button('Diabetes Test Result'):
-        diab_prediction = models['diabetes'].predict([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
-        diab_diagnosis = 'The person is diabetic' if diab_prediction[0] == 1 else 'The person is not diabetic'
-        st.success(diab_diagnosis)
-# Heart Disease Prediction Page
-if selected == 'Heart Disease Prediction':
-    st.title('Heart Disease')
+        prediction = models['diabetes'].predict([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
+        st.success('The person is diabetic' if prediction[0] == 1 else 'The person is not diabetic')
+
+elif selected == 'Heart Disease Prediction':
+    st.title('Heart Disease Prediction')
     st.write("Enter the following details to predict heart disease:")
     age = display_input('Age', 'Enter age of the person', 'age', 'number')
     sex = display_input('Sex (1 = male; 0 = female)', 'Enter sex of the person', 'sex', 'number')
@@ -79,18 +87,16 @@ if selected == 'Heart Disease Prediction':
     trestbps = display_input('Resting Blood Pressure', 'Enter resting blood pressure', 'trestbps', 'number')
     chol = display_input('Serum Cholesterol in mg/dl', 'Enter serum cholesterol', 'chol', 'number')
     fbs = display_input('Fasting Blood Sugar > 120 mg/dl (1 = true; 0 = false)', 'Enter fasting blood sugar', 'fbs', 'number')
-    restecg = display_input('Resting Electrocardiographic results (0, 1, 2)', 'Enter resting ECG results', 'restecg', 'number')
+    restecg = display_input('Resting ECG (0, 1, 2)', 'Enter resting ECG results', 'restecg', 'number')
     thalach = display_input('Maximum Heart Rate achieved', 'Enter maximum heart rate', 'thalach', 'number')
     exang = display_input('Exercise Induced Angina (1 = yes; 0 = no)', 'Enter exercise induced angina', 'exang', 'number')
     oldpeak = display_input('ST depression induced by exercise', 'Enter ST depression value', 'oldpeak', 'number')
     slope = display_input('Slope of the peak exercise ST segment (0, 1, 2)', 'Enter slope value', 'slope', 'number')
     ca = display_input('Major vessels colored by fluoroscopy (0-3)', 'Enter number of major vessels', 'ca', 'number')
     thal = display_input('Thal (0 = normal; 1 = fixed defect; 2 = reversible defect)', 'Enter thal value', 'thal', 'number')
-    heart_diagnosis = ''
     if st.button('Heart Disease Test Result'):
-        heart_prediction = models['heart_disease'].predict([[age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]])
-        heart_diagnosis = 'The person has heart disease' if heart_prediction[0] == 1 else 'The person does not have heart disease'
-        st.success(heart_diagnosis)
+        prediction = models['heart_disease'].predict([[age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal]])
+        st.success('The person has heart disease' if prediction[0] == 1 else 'The person does not have heart disease')
 # Parkinson's Prediction Page
 if selected == "Parkinsons Prediction":
     st.title("Parkinson's Disease")
@@ -162,3 +168,5 @@ if selected == "Hypo-Thyroid Prediction":
         thyroid_prediction = models['thyroid'].predict([[age, sex, on_thyroxine, tsh, t3_measured, t3, tt4]])
         thyroid_diagnosis = "The person has Hypo-Thyroid disease" if thyroid_prediction[0] == 1 else "The person does not have Hypo-Thyroid disease"
         st.success(thyroid_diagnosis)
+st.sidebar.markdown("## Instructions")
+st.sidebar.write("Select a disease from the sidebar and enter the required details for prediction.")
